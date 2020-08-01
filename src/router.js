@@ -2,8 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Index from './views/Index.vue'
 import Console from './views/Console.vue'
-import Users from './views/Users.vue'
-import Goods from './views/Goods.vue'
+import Article from './views/Article.vue'
+import Video from './views/Video.vue'
+import Images from './views/Images.vue'
 import Login from './views/Login.vue'
 import NotFound from './views/NotFound.vue'
 
@@ -27,14 +28,19 @@ const router = new Router({
           component: Console
         },
         {
-          path: '/users',
-          name: 'users',
-          component: Users
+          path: '/article',
+          name: 'article',
+          component: Article
         },
         {
-          path: '/goods',
-          name: 'goods',
-          component: Goods
+          path: '/video',
+          name: 'video',
+          component: Video
+        },
+        {
+          path: '/images',
+          name: 'images',
+          component: Images
         },
         {
           path: '/404',
@@ -52,10 +58,9 @@ const router = new Router({
 // 全局路由守卫
 router.beforeEach((to, from, next) => {
   const LOGINURL = '/login'
-  let url, user
 
-  url = to.path
-  user = sessionStorage.getItem('user')
+  const url = to.path
+  const user = sessionStorage.getItem('user')
 
   if (url === LOGINURL) {
     sessionStorage.removeItem('user')
