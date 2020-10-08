@@ -3,7 +3,7 @@ import Router from 'vue-router'
 import Index from './views/Index.vue'
 import Console from './views/Console.vue'
 import Article from './views/Article.vue'
-import Video from './views/Video.vue'
+import Resource from './views/Resource.vue'
 import Images from './views/Images.vue'
 import Login from './views/Login.vue'
 import NotFound from './views/NotFound.vue'
@@ -33,9 +33,9 @@ const router = new Router({
           component: Article
         },
         {
-          path: '/video',
-          name: 'video',
-          component: Video
+          path: '/resource',
+          name: 'resource',
+          component: Resource
         },
         {
           path: '/images',

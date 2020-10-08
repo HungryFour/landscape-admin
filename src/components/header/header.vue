@@ -70,7 +70,7 @@ export default {
   },
   computed: {
     username () {
-      let { username } = JSON.parse(sessionStorage.getItem('user'))
+      const username = JSON.parse(sessionStorage.getItem('user')).user_name || '未设置用户名'
       return username.toUpperCase()
     }
   }

@@ -6,7 +6,7 @@
         <el-input
           v-model="loginForm.username"
           autocomplete="off"
-          placeholder="账 号: admin"
+          placeholder="账 号: 请输入账号"
           prefix-icon="el-icon-goods">
         </el-input>
       </el-form-item>
@@ -15,7 +15,7 @@
                   v-model="loginForm.password"
                   @keyup.native.enter="login('loginForm')"
                   autocomplete="off"
-                  placeholder="密 码: admin"
+                  placeholder="密 码: 请输入密码"
                   prefix-icon="el-icon-time">
           <i slot="suffix" class="el-input__icon el-icon-view btn-eye" @click="changeType"></i>
         </el-input>
@@ -56,18 +56,13 @@
         this.$refs[formName].validate((valid) => {
           if (valid) {
             this.loading = true
-            this.$http.post('/api/login', this.loginForm).then((res) => {
-              if (res.data) {
-                // 延迟两秒，演示登录按钮加载效果
-                setTimeout(() => {
-                  this.loading = false
-                  sessionStorage.setItem('user', JSON.stringify(this.loginForm))
-                  this.$router.replace({ path: '/console' })
-                }, 2000)
-              } else {
-                this.loading = false
-                this.showMsg = true
-              }
+            this.$api.login(this.loginForm).then((res) => {
+              this.loading = false
+              sessionStorage.setItem('USER_TOKEN', res.data.data.access_token)
+              sessionStorage.setItem('user', JSON.stringify(res.data.data))
+              this.$router.replace({ path: '/console' })
+            }).catch(() => {
+              this.loading = false
             })
           } else {
             console.log('login failed')

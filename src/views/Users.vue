@@ -131,7 +131,7 @@
     methods: {
       getUsers () {
         this.loading = true
-        this.$http('/api/users').then((res) => {
+        this.$api('/api/users').then((res) => {
           this.users = res.data
         }).catch((err) => {
           console.error(err)

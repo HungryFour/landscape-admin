@@ -183,7 +183,7 @@
     methods: {
       getArticles () {
         this.loading = true
-        this.$http('/api/articles').then((res) => {
+        this.$api('/api/articles').then((res) => {
           this.articles = res.data
         }).catch((err) => {
           console.error(err)

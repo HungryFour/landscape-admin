@@ -1,25 +1,24 @@
 <template>
-  <div class="user-box">
+  <div class="container">
     <el-row>
       <el-col :span="24">
         <div class="tool-box">
           <el-button type="primary" icon="el-icon-circle-plus-outline" size="small" @click="handleAdd">新增</el-button>
-          <el-button type="danger" icon="el-icon-delete" size="small" @click="mulDelete">批量删除</el-button>
         </div>
       </el-col>
     </el-row>
-    <el-table
-      :data="users"
-      @selection-change="selectChange"
-      style="width: 100%">
-      <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column sortable prop="date" label="日期" width="180"></el-table-column>
-      <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-      <el-table-column prop="phone" label="联系方式" width="180"></el-table-column>
-      <el-table-column prop="address" label="地址"></el-table-column>
-      <el-table-column label="状态">
+    <el-table :data="articles" style="width: 100%">
+      <el-table-column sortable prop="date" label="发表日期" width="180"></el-table-column>
+      <el-table-column prop="title" label="标题" width="180"></el-table-column>
+      <el-table-column prop="content" :show-overflow-tooltip="true" label="内容" min-width="180"></el-table-column>
+      <el-table-column prop="pic" label="图片">
         <template slot-scope="scope">
-          {{ scope.row.status ? '启用' : '禁用' }}
+          <el-image
+            style="width: 100px; height: 100px"
+            :src="scope.row.pic"
+            :preview-src-list="[scope.row.pic]"
+            fit="contain">
+          </el-image>
         </template>
       </el-table-column>
       <el-table-column label="操作" fixed="right" width="150">
@@ -29,36 +28,46 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination background :page-sizes="[10, 20, 30, 50]" :page-size="10" layout="total, sizes, prev, pager, next, jumper" :total="400"></el-pagination>
-    <el-dialog :title="dialogTitle" width="600px" :visible.sync="userFormVisible" @close="resetForm('userForm')">
-      <el-form :model="user" :rules="rules" ref="userForm">
-        <el-form-item label="姓名" prop="name" label-width="50px">
-          <el-input v-model="user.name" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="手机" label-width="50px">
-          <el-input v-model="user.phone" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="地址" label-width="50px">
-          <el-input v-model="user.address" autocomplete="off"></el-input>
-        </el-form-item>
-        <el-form-item label="日期" label-width="50px">
+    <el-pagination class="pagination"
+                   background=""
+                   layout="prev, pager, next"
+                   :current-page="pageIndex"
+                   :page-size="pageSize"
+                   :total="totalItems"
+                   @current-change="paginationCurPageChange"
+    ></el-pagination>
+    <el-dialog :title="dialogTitle" width="800px" :visible.sync="editFormVisible" @close="resetForm('infoForm')">
+      <el-form :model="edit_article" :rules="rules" ref="infoForm" label-width="100px">
+        <el-form-item label="发表日期" prop="date" :rules="[ {required: true, message: '请选择日期', trigger: 'blur'}]">
           <el-date-picker
-            v-model="user.date"
+            v-model="edit_article.date"
             type="date"
             value-format="yyyy-MM-dd"
             placeholder="选择日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="状态" label-width="50px">
-          <el-switch v-model="user.status" active-color="#13ce66"
-                     inactive-color="#ff4949"
-                     :active-value="1"
-                     :inactive-value="0"></el-switch>
+        <el-form-item label="标题" prop="title" :rules="[ {required: true, message: '请填写标题', trigger: 'blur'}]">
+          <el-input v-model="edit_article.title"></el-input>
+        </el-form-item>
+        <el-form-item label="内容" prop="content" :rules="[ {required: true, message: '请填写内容', trigger: 'blur'}]">
+          <el-input type="textarea" v-model="edit_article.content"></el-input>
+        </el-form-item>
+        <el-form-item label="图片" prop="pic" :rules="[ {required: true, message: '请选择图片', trigger: 'blur'}]">
+          <el-upload
+            class="avatar-uploader"
+            action=""
+            accept="image/jpeg,image/png,image/gif,image/jpg"
+            :http-request="uploadImageFile"
+            name="index_pic"
+            :show-file-list="false">
+            <img v-if="edit_article.pic" :src="edit_article.pic" class="avatar">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+          </el-upload>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="userFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="submitUser('userForm')">确 定</el-button>
+        <el-button @click="editFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitUser('infoForm')">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -68,130 +77,171 @@
   export default {
     data () {
       return {
-        users: [],
-        user: {
+        articles: [],
+        article: {
           id: '',
           date: '',
-          name: '',
-          phone: '',
-          address: '',
-          status: 0
+          content: '',
+          title: '',
+          author: '',
+          pic: ''
         },
-        userBackup: Object.assign({}, this.user),
-        multipleSelection: [],
-        userFormVisible: false,
+        edit_article: {},
+        pageSize: 15,
+        pageIndex: 1,
+        totalItems: 0,
+        editFormVisible: false,
         dialogTitle: '',
         rowIndex: 9999,
         rules: {
-          name: [
-            { required: true, message: '请输入姓名', trigger: 'blur' },
-            { min: 2, max: 5, message: '长度在 2 到 5 个字符', trigger: 'blur' }
+          content: [
+            { required: true, message: '请输入内容', trigger: 'blur' }
           ]
         }
       }
     },
     mounted () {
-      this.getUsers()
+      this.getArticles()
     },
     methods: {
-      getUsers () {
+      async paginationCurPageChange (page) {
+        this.pageIndex = page
+        this.getArticles()
+      },
+      getArticles () {
         this.loading = true
-        this.$http('/api/users').then((res) => {
-          this.users = res.data
+        const param = {}
+        this.$api.getArticles(param).then((res) => {
+          this.articles = res.data.data
         }).catch((err) => {
           console.error(err)
         })
       },
       handleEdit (index, row) {
         this.dialogTitle = '编辑'
-        this.user = Object.assign({}, row)
-        this.userFormVisible = true
+        this.edit_article = Object.assign({}, row)
+        this.editFormVisible = true
         this.rowIndex = index
       },
       submitUser (formName) {
         // 表单验证
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            const id = this.user.id
-            if (id) {
-              // id非空-修改
-              this.users.splice(this.rowIndex, 1, this.user)
-            } else {
-              // id为空-新增
-              this.user.id = this.users.length + 1
-              this.users.unshift(this.user)
-            }
-            this.userFormVisible = false
-            this.$message({
-              type: 'success',
-              message: id ? '修改成功！' : '新增成功！'
+            const loading = this.$loading({
+              lock: true,
+              text: '提交中。。。',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.7)'
             })
+            if (this.edit_article.id) {
+              this.$api.updateArticle(this.edit_article).then(res => {
+                loading.close()
+                this.$message({
+                  message: '修改成功',
+                  type: 'success'
+                })
+                this.editFormVisible = false
+                this.getArticles()
+              }).catch(() => {
+                loading.close()
+              })
+            } else {
+              this.$api.createArticle(this.edit_article).then(res => {
+                loading.close()
+                this.$message({
+                  message: '添加成功',
+                  type: 'success'
+                })
+                this.editFormVisible = false
+                this.getArticles()
+              }).catch(() => {
+                loading.close()
+              })
+            }
+          } else {
+            return false
           }
         })
       },
       handleDelete (index, row) {
-        this.$confirm(`确定删除用户 【${row.name}】 吗?`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.users.splice(index, 1)
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
-        }).catch(() => {
-          console.log('取消删除')
-        })
+        // this.$confirm(`确定删除用户 【${row.name}】 吗?`, '提示', {
+        //   confirmButtonText: '确定',
+        //   cancelButtonText: '取消',
+        //   type: 'warning'
+        // }).then(() => {
+        //   this.users.splice(index, 1)
+        //   this.$message({
+        //     type: 'success',
+        //     message: '删除成功!'
+        //   })
+        // }).catch(() => {
+        //   console.log('取消删除')
+        // })
       },
       resetForm (formName) {
         this.$refs[formName].clearValidate()
       },
-      mulDelete () {
-        const len = this.multipleSelection.length
-        if (len === 0) {
-          this.$message({
-            type: 'warning',
-            message: '请至少选择一项！'
-          })
-        } else {
-          this.$confirm(`确定删除选中的 ${len} 个用户吗？`, '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            this.$message({
-              type: 'success',
-              message: `成功删除了${len}条数据！`
-            })
-          }).catch(() => {
-            console.log('取消删除')
-          })
-        }
-      },
-      selectChange (val) {
-        this.multipleSelection = val
-      },
       handleAdd () {
         this.dialogTitle = '新增'
-        this.user = Object.assign({}, this.userBackup)
-        this.userFormVisible = true
+        this.edit_article = JSON.parse(JSON.stringify(this.article))
+        console.log('add _ article:', this.edit_article)
+        this.editFormVisible = true
+      },
+      uploadImageFile (files) {
+        console.log('files:', files.file)
+        this.$api.uploadFile({
+          file: files.file
+        }).then(res => {
+          this.edit_article.pic = 'http://127.0.0.1:5445/image/' + res.data.data.resume_name
+          this.$message({ message: '上传成功', type: 'success' })
+        })
       }
     }
   }
 </script>
 
-<style lang="scss" scoped>
-  .user-box {
+<style>
+  .container {
+    display: flex;
     width: 100%;
-
-    .tool-box {
-      padding: 10px 10px;
-      border-bottom: 1px solid #eee;
-    }
-
-    .el-pagination {
-      margin-top: 20px;
-    }
   }
+
+  .tool-box {
+    padding: 10px 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .el-pagination {
+    margin-top: 20px;
+  }
+
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+
+  .avatar-uploader-icon {
+    display: flex;
+    justify-content: center;
+    font-size: 28px;
+    color: #8c939d;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 100px;
+    height: 100px;
+    display: block;
+  }
+
 </style>

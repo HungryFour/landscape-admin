@@ -15,13 +15,9 @@
       <i class="el-icon-user"></i>
       <span slot="title">文章</span>
     </el-menu-item>
-    <el-menu-item index="/video">
+    <el-menu-item index="/resource">
       <i class="el-icon-s-goods"></i>
-      <span slot="title">视频</span>
-    </el-menu-item>
-    <el-menu-item index="/images">
-      <i class="el-icon-s-goods"></i>
-      <span slot="title">图片</span>
+      <span slot="title">资源</span>
     </el-menu-item>
     <el-submenu index="4">
       <template slot="title">
