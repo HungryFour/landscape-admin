@@ -2,7 +2,8 @@
   <el-container class="index-box">
     <el-aside width="asideWidth">
       <div class="logo">
-        <img v-show="!isCollapse" src="./../assets/logo.png" alt="ELementUI" width="122" height="27">
+<!--        <img src="./../assets/logo.png" alt="ELementUI" width="40" height="40">-->
+<!--        <div style="margin-left: 10px" v-if="!isCollapse">中视华章</div>-->
       </div>
       <menus :isCollapse="isCollapse"/>
     </el-aside>
@@ -76,11 +77,14 @@
       min-height: 100%;
 
       .logo {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
         background-color: #20222A;
         color: rgba(255, 255, 255, .8);
         text-align: center;
         height: 60px;
-        padding-top: 16px;
         font-size: 16px;
         box-sizing: border-box;
         border-bottom: 1px solid gray;

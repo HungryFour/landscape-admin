@@ -12,21 +12,33 @@
       <span slot="title">主页</span>
     </el-menu-item>
     <el-menu-item index="/article">
-      <i class="el-icon-user"></i>
+      <i class="el-icon-notebook-2"></i>
       <span slot="title">文章</span>
     </el-menu-item>
     <el-menu-item index="/resource">
       <i class="el-icon-s-goods"></i>
       <span slot="title">资源</span>
     </el-menu-item>
-    <el-submenu index="4">
-      <template slot="title">
-        <i class="el-icon-setting"></i>
-        <span>设置</span>
-      </template>
-      <el-menu-item index="/profile">基本资料 (空)</el-menu-item>
-      <el-menu-item index="/password">修改密码 (空)</el-menu-item>
-    </el-submenu>
+    <el-menu-item index="/team">
+      <i class="el-icon-user"></i>
+      <span slot="title">团队</span>
+    </el-menu-item>
+    <el-menu-item index="/messageBoard">
+      <i class="el-icon-user"></i>
+      <span slot="title">网站留言</span>
+    </el-menu-item>
+    <el-menu-item index="/password">
+      <i class="el-icon-setting"></i>
+      <span slot="title">修改密码</span>
+    </el-menu-item>
+<!--    <el-submenu index="4">-->
+<!--      <template slot="title">-->
+<!--        <i class="el-icon-setting"></i>-->
+<!--        <span>设置</span>-->
+<!--      </template>-->
+<!--      <el-menu-item index="/profile">基本资料 (空)</el-menu-item>-->
+<!--      <el-menu-item index="/password">修改密码 (空)</el-menu-item>-->
+<!--    </el-submenu>-->
   </el-menu>
 </template>
 

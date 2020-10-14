@@ -7,7 +7,7 @@
         </div>
       </el-col>
     </el-row>
-    <el-table :data="articles" style="width: 100%">
+    <el-table :data="articles" style="width: 100%" v-loading="tableLoading">
       <el-table-column sortable prop="date" label="发表日期" width="180"></el-table-column>
       <el-table-column prop="title" label="标题" width="180"></el-table-column>
       <el-table-column prop="content" :show-overflow-tooltip="true" label="内容" min-width="180"></el-table-column>
@@ -28,16 +28,9 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination class="pagination"
-                   background=""
-                   layout="prev, pager, next"
-                   :current-page="pageIndex"
-                   :page-size="pageSize"
-                   :total="totalItems"
-                   @current-change="paginationCurPageChange"
-    ></el-pagination>
+
     <el-dialog :title="dialogTitle" width="800px" :visible.sync="editFormVisible" @close="resetForm('infoForm')">
-      <el-form :model="edit_article" :rules="rules" ref="infoForm" label-width="100px">
+      <el-form :model="edit_article" ref="infoForm" label-width="100px">
         <el-form-item label="发表日期" prop="date" :rules="[ {required: true, message: '请选择日期', trigger: 'blur'}]">
           <el-date-picker
             v-model="edit_article.date"
@@ -61,7 +54,7 @@
             name="index_pic"
             :show-file-list="false">
             <img v-if="edit_article.pic" :src="edit_article.pic" class="avatar">
-            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            <div class="avatar-uploader-icon" v-else>点击上传</div>
           </el-upload>
         </el-form-item>
       </el-form>
@@ -87,33 +80,23 @@
           pic: ''
         },
         edit_article: {},
-        pageSize: 15,
-        pageIndex: 1,
-        totalItems: 0,
         editFormVisible: false,
         dialogTitle: '',
-        rowIndex: 9999,
-        rules: {
-          content: [
-            { required: true, message: '请输入内容', trigger: 'blur' }
-          ]
-        }
+        tableLoading: false
       }
     },
     mounted () {
       this.getArticles()
     },
     methods: {
-      async paginationCurPageChange (page) {
-        this.pageIndex = page
-        this.getArticles()
-      },
       getArticles () {
-        this.loading = true
+        this.tableLoading = true
         const param = {}
         this.$api.getArticles(param).then((res) => {
+          this.tableLoading = false
           this.articles = res.data.data
         }).catch((err) => {
+          this.tableLoading = false
           console.error(err)
         })
       },
@@ -121,7 +104,6 @@
         this.dialogTitle = '编辑'
         this.edit_article = Object.assign({}, row)
         this.editFormVisible = true
-        this.rowIndex = index
       },
       submitUser (formName) {
         // 表单验证
@@ -164,19 +146,26 @@
         })
       },
       handleDelete (index, row) {
-        // this.$confirm(`确定删除用户 【${row.name}】 吗?`, '提示', {
-        //   confirmButtonText: '确定',
-        //   cancelButtonText: '取消',
-        //   type: 'warning'
-        // }).then(() => {
-        //   this.users.splice(index, 1)
-        //   this.$message({
-        //     type: 'success',
-        //     message: '删除成功!'
-        //   })
-        // }).catch(() => {
-        //   console.log('取消删除')
-        // })
+        this.$confirm(`确定删除 【${row.title}】 吗?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.$api.removeArticle(row.id).then(res => {
+            this.articles.splice(index, 1)
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'error',
+              message: '删除失败，请重新尝试'
+            })
+          })
+        }).catch(() => {
+          console.log('取消删除')
+        })
       },
       resetForm (formName) {
         this.$refs[formName].clearValidate()
@@ -192,7 +181,7 @@
         this.$api.uploadFile({
           file: files.file
         }).then(res => {
-          this.edit_article.pic = 'http://127.0.0.1:5445/image/' + res.data.data.resume_name
+          this.edit_article.pic = 'http://api.huazhangmedia.com/image/' + res.data.data.resume_name
           this.$message({ message: '上传成功', type: 'success' })
         })
       }
@@ -204,6 +193,7 @@
   .container {
     display: flex;
     width: 100%;
+    flex-direction: column;
   }
 
   .tool-box {

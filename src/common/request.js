@@ -25,6 +25,7 @@ axios.interceptors.response.use(response => {
     return response
   }
 }, error => {
+  console.log('error: ', error)
   if (error && error.response && error.response.status === 401) {
     throw new Error('session_timeout')
   }
@@ -40,19 +41,16 @@ axios.interceptors.request.use(
       Router.replace('/login')
     }
 
-    console.log('sessionStorage.user_id:', JSON.parse(sessionStorage.getItem('user')).user_id)
-
     if (config.method === 'get') {
       config.params = {
-        user_id: JSON.parse(sessionStorage.getItem('user')).user_id,
+        user_id: JSON.parse(sessionStorage.getItem('user')) ? JSON.parse(sessionStorage.getItem('user')).user_id : '',
         ...config.params
       }
     } else {
-      console.log('Content-Type:', config.headers['Content-Type'])
       if (config.headers['Content-Type'] !== 'multipart/form-data') {
         config.data = {
           ...config.data,
-          user_id: JSON.parse(sessionStorage.getItem('user')).user_id
+          user_id: JSON.parse(sessionStorage.getItem('user')) ? JSON.parse(sessionStorage.getItem('user')).user_id : ''
         }
       }
     }
@@ -65,7 +63,7 @@ axios.interceptors.request.use(
 
 export default class Api {
   constructor () {
-    this.server = 'http://127.0.0.1:5445/'
+    this.server = 'http://api.huazhangmedia.com/'
   }
 
   async uploadFile (uri, params) {

@@ -1,6 +1,7 @@
 <template>
   <div class="console">
-    THANK YOU , WELCOME TO POPMART @
+    <img src="./../assets/logo.png" alt="ELementUI" width="200" height="200">
+    <h1 class="mdui-m-b-4 mdui-p-t-5 mdui-text-color-grey-700">欢迎使用中视华章网站管理后台</h1>
   </div>
 </template>
 
@@ -12,6 +13,6 @@
   .console {
     font-size: 30px;
     text-align: center;
-    margin-top: 350px;
+    margin-top: 200px;
   }
 </style>

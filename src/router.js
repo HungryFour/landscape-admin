@@ -4,9 +4,11 @@ import Index from './views/Index.vue'
 import Console from './views/Console.vue'
 import Article from './views/Article.vue'
 import Resource from './views/Resource.vue'
-import Images from './views/Images.vue'
+import Team from './views/Team'
+import Password from './views/Password'
 import Login from './views/Login.vue'
 import NotFound from './views/NotFound.vue'
+import MessageBoard from './views/MessageBoard'
 
 Vue.use(Router)
 
@@ -38,9 +40,19 @@ const router = new Router({
           component: Resource
         },
         {
-          path: '/images',
-          name: 'images',
-          component: Images
+          path: '/team',
+          name: 'team',
+          component: Team
+        },
+        {
+          path: '/messageBoard',
+          name: 'messageBoard',
+          component: MessageBoard
+        },
+        {
+          path: '/password',
+          name: 'password',
+          component: Password
         },
         {
           path: '/404',
