@@ -2,8 +2,8 @@
   <el-container class="index-box">
     <el-aside width="asideWidth">
       <div class="logo">
-<!--        <img src="./../assets/logo.png" alt="ELementUI" width="40" height="40">-->
-<!--        <div style="margin-left: 10px" v-if="!isCollapse">中视华章</div>-->
+        <img src="./../assets/logo.png" alt="ELementUI" width="40" height="40">
+        <div style="margin-left: 10px" v-if="!isCollapse">中视华章</div>
       </div>
       <menus :isCollapse="isCollapse"/>
     </el-aside>
